@@ -27,3 +27,21 @@ export function calculateProteinPerMeal(dailyProtein: number, mealsPerDay: numbe
 
     return proteinPerMeal;
 }
+
+export function gramsOfFoodNeeded(foodProteinPer100g: number, targetProtein: number): number {
+    if (foodProteinPer100g <= 0) {
+        throw new Error("Food protein per 100g must be greater than zero");
+    }
+
+    if (targetProtein < 0) {
+        throw new Error("Target protein must be greater than zero");
+    }
+
+    if (targetProtein === 0) {
+        return 0;
+    }
+
+    const exactGrams = (targetProtein / foodProteinPer100g) * 100;
+
+    return Math.round(exactGrams / 5) * 5;
+} 
