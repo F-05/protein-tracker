@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { calculateDailyProtein, calculateProteinPerMeal, type Goal } from "@/lib/protein";
 import PortionList from "@/components/PortionList";
 import { ensureSession } from "@/lib/auth";
+import { loadProfile, saveProfile } from "@/lib/profile";
 
 
 const GOALS: { value: Goal; label: string }[] = [
@@ -26,8 +27,24 @@ export default function Home() {
   const [mealsPerDay, setMealsPerDay] = useState("3");
   const meals = Number(mealsPerDay);
 
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+
   useEffect(() => {
-    ensureSession();
+    async function init() {
+      await ensureSession();
+
+      const profile = await loadProfile();
+
+      if (profile) {
+        setWeight(String(profile.weightKg));
+        setGoal(profile.goal);
+        setMealsPerDay(String(profile.mealsPerDay));
+      }
+    }
+
+    init().catch((error) => {
+      console.error("Failed to load profile:", error);
+    });
   }, []);
 
   const dailyProtein = 
@@ -37,6 +54,22 @@ export default function Home() {
     dailyProtein !== null && meals > 0
       ? calculateProteinPerMeal(dailyProtein, meals)
       : null;
+
+  const canSave = weightKg > 0 && Number.isInteger(meals) && meals >= 1 && meals <= 10;
+
+  async function handleSave() {
+    if (!canSave) return;
+
+    setSaveStatus("saving");
+
+    try{
+      await saveProfile({ weightKg, goal, mealsPerDay: meals });
+      setSaveStatus("saved");
+    } catch(error) {
+      console.error("Failed to save profile:", error);
+      setSaveStatus("error");
+    }
+  }
 
   return (
     <div className="min-h-screen bg-slate-100 p-6">
@@ -51,7 +84,10 @@ export default function Home() {
               inputMode="decimal"
               min="0"
               value={weight}
-              onChange={(e) => setWeight(e.target.value)}
+              onChange={(e) => {
+                setWeight(e.target.value);
+                setSaveStatus("idle");
+              }}
             />
           </label>
 
@@ -65,7 +101,10 @@ export default function Home() {
                   <button
                     key={option.value}
                     type="button"
-                    onClick={() => setGoal(option.value)}
+                    onClick={() => {
+                      setGoal(option.value);
+                      setSaveStatus("idle");
+                    }}
                     aria-pressed={isSelected}
                     className={`rounded-lg border px-3 py-2 text-sm font-medium transition-colors duration-200 active:scale-95 ${
                       isSelected
@@ -88,9 +127,28 @@ export default function Home() {
               inputMode="numeric"
               min="1"
               value={mealsPerDay}
-              onChange={(e) => setMealsPerDay(e.target.value)}
+              onChange={(e) => {
+                setMealsPerDay(e.target.value);
+                setSaveStatus("idle");
+              }}
             />
           </label>
+
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={!canSave || saveStatus === "saving"}
+            className="rounded-lg bg-brand-500 px-3 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {saveStatus === "saving" ? "Saving..." : "Save settings"}
+          </button>
+
+          {saveStatus === "saved" && (
+            <p className="text-sm text-brand-700">Settings saved.</p>
+          )}
+          {saveStatus === "error" && (
+            <p className="text-sm text-red-600">Couldn&apos;t save. Please try again.</p>
+          )}
 
           {dailyProtein !== null && proteinPerMeal !== null ? (
             <div className="grid grid-cols-2 gap-4">
