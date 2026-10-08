@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { calculateDailyProtein, calculateProteinPerMeal, type Goal } from "@/lib/protein";
 import PortionList from "@/components/PortionList";
+import { ensureSession } from "@/lib/auth";
+
 
 const GOALS: { value: Goal; label: string }[] = [
   { value: "maintain", label: "Maintain" },
@@ -23,6 +25,10 @@ export default function Home() {
 
   const [mealsPerDay, setMealsPerDay] = useState("3");
   const meals = Number(mealsPerDay);
+
+  useEffect(() => {
+    ensureSession();
+  }, []);
 
   const dailyProtein = 
     weightKg > 0 ? calculateDailyProtein(weightKg, goal) : null;
