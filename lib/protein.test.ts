@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { calculateDailyProtein, calculateProteinPerMeal, gramsOfFoodNeeded, proteinInPortion, totalProtein } from "./protein";
+import { calculateDailyProtein, calculateProteinPerMeal, gramsOfFoodNeeded, proteinInPortion, totalProtein, progressPercent } from "./protein";
 
 describe("calculateDailyProtein", () => {
     it("returns 128 g for 80 kg on maintain", () =>  {
@@ -116,5 +116,35 @@ describe("totalProtein", () => {
 
     it("rounds away floating point error", () => {
         expect(totalProtein([0.1, 0.2])).toBe(0.3);
+    });
+})
+
+describe("progressPercent", () => {
+    it("returns 67 when eaten 86.3 g of protein and target of 128 g", () => {
+        expect(progressPercent(86.3, 128)).toBe(67);
+    });
+
+    it("returns 0 when haven't eaten anything", () => {
+        expect(progressPercent(0, 128)).toBe(0);
+    });
+
+    it("returns 100 when eaten equal to the target", () => {
+        expect(progressPercent(128, 128)).toBe(100);
+    });
+
+    it("returns 100 when eaten above the target", () => {
+        expect(progressPercent(150, 128)).toBe(100);
+    });
+
+    it("throws when target is zero", () => {
+        expect(() => progressPercent(30, 0)).toThrow();
+    });
+
+    it("throws when target is negative", () => {
+        expect(() => progressPercent(30, -30)).toThrow();
+    });
+
+    it("throws when eaten is negative", () => {
+        expect(() => progressPercent(-30, 128)).toThrow();
     });
 })
