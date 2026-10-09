@@ -7,6 +7,7 @@ import { ensureSession } from "@/lib/auth";
 import { loadProfile, saveProfile } from "@/lib/profile";
 import { deleteMeal, loadTodaysMeals, logMeal, type MealLog } from "@/lib/mealLogs";
 import { type Food } from "@/lib/foods";
+import DailyProgress from "@/components/DailyProgress";
 
 
 const GOALS: { value: Goal; label: string }[] = [
@@ -224,23 +225,35 @@ export default function Home() {
           )}
         </div>
 
-        {proteinPerMeal !== null && (
-          <div className="w-full rounded-2xl bg-white p-6 shadow-sm md:flex-1">
-            {logMessage && (
-              <p
-                role="status"
-                className={`mb-3 rounded-lg px-3 py-2 text-sm ${
-                  logMessage.type === "success"
-                  ? "bg-brand-50 text-brand-700"
-                  : "bg-red-50 text-red-700"
-                }`}
-              >
-                {logMessage.text}
-              </p>
-            )}
-            <p className="text-brand-700">Eaten today: {eatenToday} g</p>
+        {dailyProtein !== null && proteinPerMeal !== null && (
+          <div className="flex w-full flex-col gap-4 md:flex-1">
 
-            <PortionList proteinPerMeal={proteinPerMeal} onLog={handleLog} />
+            <div className="rounded-2xl bg-white p-6 shadow-sm">
+              <DailyProgress
+                target={dailyProtein}
+                eaten={eatenToday}
+                meals={todaysMeals}
+                onDelete={handleDelete}
+              />
+            </div>
+
+            <div className="rounded-2xl bg-white p-6 shadow-sm">
+              {logMessage && (
+                <p
+                  role="status"
+                  className={`mb-3 rounded-lg px-3 py-2 text-sm ${
+                    logMessage.type === "success"
+                    ? "bg-brand-50 text-brand-700"
+                    : "bg-red-50 text-red-700"
+                  }`}
+                >
+                  {logMessage.text}
+                </p>
+              )}
+
+              <PortionList proteinPerMeal={proteinPerMeal} onLog={handleLog} />
+            </div>
+  
           </div>
         )}
       </main>
