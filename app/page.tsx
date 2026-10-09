@@ -15,10 +15,10 @@ const GOALS: { value: Goal; label: string }[] = [
   { value: "cut", label: "Cut" },
 ];
 
-const labelClasses = "text-sm font-medium text-slate-700";
+const labelClasses = "text-sm font-medium text-ink-700";
 
 const fieldClasses =
-"rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 transition-colors duration-200 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500";
+"rounded-lg border border-sand-400 bg-white px-3 py-2 text-ink-900 transition-colors duration-200 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500";
 
 export default function Home() {
   const [weight, setWeight] = useState("");
@@ -103,10 +103,10 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 p-6">
+    <div className="min-h-screen bg-sand-50 p-6">
       <main className="mx-auto flex max-w-4xl flex-col gap-4 md:flex-row md:items-start md:justify-center">
         <div className="flex w-full flex-col gap-4 rounded-2xl bg-white p-6 shadow-sm md:w-96 md:shrink-0">
-          <h1 className="text-2xl font-bold text-slate-900">Protein calculator</h1>
+          <h1 className="text-2xl font-bold text-ink-900">Protein calculator</h1>
           <label className="flex flex-col gap-1">
             <span className={labelClasses}> Weight (kg)</span>
             <input
@@ -139,8 +139,8 @@ export default function Home() {
                     aria-pressed={isSelected}
                     className={`rounded-lg border px-3 py-2 text-sm font-medium transition-colors duration-200 active:scale-95 ${
                       isSelected
-                        ? "border-brand-500 bg-brand-500 text-white"
-                        : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                        ? "border-brand-700 bg-brand-700 text-white"
+                        : "border-sand-400 bg-white text-ink-700 hover:bg-slate-50"
                     }`}
                   >
                     {option.label}
@@ -169,7 +169,7 @@ export default function Home() {
             type="button"
             onClick={handleSave}
             disabled={!canSave || saveStatus === "saving"}
-            className="rounded-lg bg-brand-500 px-3 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg bg-brand-700 px-3 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-brand-900 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saveStatus === "saving" ? "Saving..." : "Save settings"}
           </button>
@@ -184,16 +184,16 @@ export default function Home() {
           {dailyProtein !== null && proteinPerMeal !== null ? (
             <div className="grid grid-cols-2 gap-4">
               <div className="rounded-xl bg-brand-50 p-4">
-                <p className="text-sm text-slate-500">Daily Protein Target</p>
+                <p className="text-sm text-lavender-700">Daily Protein Target</p>
                 <p className="text-3xl font-bold text-brand-700">{dailyProtein} g</p>
               </div>
               <div className="rounded-xl bg-brand-50 p-4">
-                <p className="text-sm text-slate-500">Protein per Meal</p>
+                <p className="text-sm text-lavender-700">Protein per Meal</p>
                 <p className="text-3xl font-bold text-brand-700">{proteinPerMeal} g</p>
               </div>
             </div>
           ) : (
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-lavender-700">
               Please enter your weight and meals per day to calculate protein targets.
             </p>
           )}

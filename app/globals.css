@@ -13,9 +13,23 @@
 }
 
 @theme {
-  --color-brand-50: #ecfdf5;
-  --color-brand-500: #10b981;
-  --color-brand-700: #047857;
+  /* Brand */
+  --color-brand-50: #FFD3AC;
+  --color-brand-500: #E35336;
+  --color-brand-700: #8A2B0E;
+  --color-brand-900: #6B210B;
+
+  /* Secondary */
+  --color-lavender-500: #9988A1;
+  --color-lavender-700: #5E5266;
+
+  /* Warm neutrals */
+  --color-sand-50: #FFF8F2;
+  --color-sand-100: #FBE6D4;
+  --color-sand-200: #EFE1D6;
+  --color-sand-400: #C9B4A6;
+  --color-ink-700: #4A3A33;
+  --color-ink-900: #2B1B14;
 }
 
 body {
