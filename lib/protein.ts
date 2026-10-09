@@ -59,3 +59,13 @@ export function proteinInPortion(grams: number, proteinPer100g: number): number 
 
     return Math.round(proteinGrams * 10) / 10;
 }
+
+export function totalProtein(amounts: number[]): number {
+    let totalProtein = 0;
+
+    for (const amount of amounts) {
+        totalProtein += amount;
+    }
+
+    return Math.round(totalProtein * 10) / 10;
+}

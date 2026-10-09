@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { calculateDailyProtein, calculateProteinPerMeal, gramsOfFoodNeeded, proteinInPortion } from "./protein";
+import { calculateDailyProtein, calculateProteinPerMeal, gramsOfFoodNeeded, proteinInPortion, totalProtein } from "./protein";
 
 describe("calculateDailyProtein", () => {
     it("returns 128 g for 80 kg on maintain", () =>  {
@@ -98,5 +98,23 @@ describe("proteinInPortion", () => {
 
     it("throws when proteinPer100g is negative", () => {
         expect(() => proteinInPortion(140, -30)).toThrow();
+    });
+})
+
+describe("totalProtein", () => {
+    it("returns 0 g when the list is empty", () => {
+        expect(totalProtein([])).toBe(0);
+    });
+
+    it("returns 40 g when the list contains a single item", () => {
+        expect(totalProtein([40])).toBe(40);
+    });
+
+    it("returns 86.3 g when a list contains several numbers", () => {
+        expect(totalProtein([43.4, 42.9])).toBe(86.3);
+    });
+
+    it("rounds away floating point error", () => {
+        expect(totalProtein([0.1, 0.2])).toBe(0.3);
     });
 })
