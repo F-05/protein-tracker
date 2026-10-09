@@ -1,11 +1,12 @@
 "use client";
 
-import { type FoodCategory, FOODS } from "@/lib/foods";
+import { type FoodCategory, type Food, FOODS } from "@/lib/foods";
 import { gramsOfFoodNeeded } from "@/lib/protein";
 import { useState } from "react";
 
 type PortionListProps = {
     proteinPerMeal: number;
+    onLog: (food: Food, grams: number) => void;
 }
 
 const CATEGORIES: { value: FoodCategory; label: string }[] = [
@@ -15,7 +16,7 @@ const CATEGORIES: { value: FoodCategory; label: string }[] = [
     { value: "plant-based", label: "Plant-based" },
 ]
 
-export default function PortionList({ proteinPerMeal }: PortionListProps) {
+export default function PortionList({ proteinPerMeal, onLog }: PortionListProps) {
     const [openCategory, setOpenCategory] = useState<FoodCategory | null>("meat");
 
     return (
@@ -23,6 +24,9 @@ export default function PortionList({ proteinPerMeal }: PortionListProps) {
             <h2 className="text-lg font-semibold text-slate-900">
                 To get {proteinPerMeal} g of protein in one meal, you can eat:
             </h2>
+            <p className="text-sm text-slate-500">
+                Tap Add to log after eating a portion to count it towards your protein intake today.
+            </p>
             <ul className="flex flex-col">
                 {CATEGORIES.map((category) => {
                     const isOpen = openCategory === category.value;
@@ -56,10 +60,21 @@ export default function PortionList({ proteinPerMeal }: PortionListProps) {
                                         return (
                                             <li 
                                                 key={food.id} 
-                                                className="flex justify-between border-b border-slate-200 py-2 text-sm last:border-b-0"
+                                                className="flex items-center justify-between gap-3 border-b border-slate-200 py-2 text-sm last:border-b-0"
                                             >
                                                 <span className="text-slate-700">{food.name}</span>
-                                                <span className="font-medium text-slate-900">about {gramsNeeded} g</span>
+
+                                                <div className="flex items-center gap-3">
+                                                    <span className="font-medium text-slate-900">about {gramsNeeded} g</span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => onLog(food, gramsNeeded)}
+                                                        aria-label={`Add ${gramsNeeded} g of ${food.name} to your meal log`}
+                                                        className="whitespace-nowrap rounded-md border border-brand-500 px-2 py-1 text-xs font-medium text-brand-700 transition-colors duration-200 hover:bg-brand-50"
+                                                    >
+                                                        + Add to log
+                                                    </button>
+                                                </div>
                                             </li>
                                         );
                                     })}

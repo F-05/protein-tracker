@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { calculateDailyProtein, calculateProteinPerMeal, type Goal } from "@/lib/protein";
+import { calculateDailyProtein, calculateProteinPerMeal, proteinInPortion, type Goal } from "@/lib/protein";
 import PortionList from "@/components/PortionList";
 import { ensureSession } from "@/lib/auth";
 import { loadProfile, saveProfile } from "@/lib/profile";
+import { logMeal } from "@/lib/mealLogs";
+import { type Food } from "@/lib/foods";
 
 
 const GOALS: { value: Goal; label: string }[] = [
@@ -29,6 +31,10 @@ export default function Home() {
 
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
 
+  const [logMessage, setLogMessage] = useState<
+    { type: "success" | "error"; text: string} | null
+  >(null);
+
   useEffect(() => {
     async function init() {
       await ensureSession();
@@ -46,6 +52,13 @@ export default function Home() {
       console.error("Failed to load profile:", error);
     });
   }, []);
+
+  useEffect(() => {
+    if (!logMessage) return;
+
+    const timer = setTimeout(() => setLogMessage(null), 4000);
+    return () => clearTimeout(timer);
+  }, [logMessage]);
 
   const dailyProtein = 
     weightKg > 0 ? calculateDailyProtein(weightKg, goal) : null;
@@ -68,6 +81,24 @@ export default function Home() {
     } catch(error) {
       console.error("Failed to save profile:", error);
       setSaveStatus("error");
+    }
+  }
+
+  async function handleLog(food: Food, grams: number) {
+    const proteinAmount = proteinInPortion(grams, food.proteinPer100g);
+
+    try {
+      await logMeal({ foodId: food.id, grams, proteinG: proteinAmount });
+      setLogMessage({
+        type: "success",
+        text: `Added ${grams} g of ${food.name} to your meal log.`,
+      });
+    } catch (error) {
+      console.error("Failed to log meal:", error)
+      setLogMessage({
+        type: "error",
+        text: `Could not log ${food.name}. Please try again.`,
+      });
     }
   }
 
@@ -170,7 +201,19 @@ export default function Home() {
 
         {proteinPerMeal !== null && (
           <div className="w-full rounded-2xl bg-white p-6 shadow-sm md:flex-1">
-            <PortionList proteinPerMeal={proteinPerMeal} />
+            {logMessage && (
+              <p
+                role="status"
+                className={`mb-3 rounded-lg px-3 py-2 text-sm ${
+                  logMessage.type === "success"
+                  ? "bg-brand-50 text-brand-700"
+                  : "bg-red-50 text-red-700"
+                }`}
+              >
+                {logMessage.text}
+              </p>
+            )}
+            <PortionList proteinPerMeal={proteinPerMeal} onLog={handleLog} />
           </div>
         )}
       </main>

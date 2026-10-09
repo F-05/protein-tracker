@@ -45,3 +45,17 @@ export function gramsOfFoodNeeded(foodProteinPer100g: number, targetProtein: num
 
     return Math.round(exactGrams / 5) * 5;
 } 
+
+export function proteinInPortion(grams: number, proteinPer100g: number): number {
+    if (grams < 0) {
+        throw new Error("Grams of food cannot be negative");
+    }
+
+    if (proteinPer100g < 0) {
+        throw new Error("Food protein per 100g cannot be negative");
+    }
+
+    const proteinGrams = (grams * proteinPer100g) / 100;
+
+    return Math.round(proteinGrams * 10) / 10;
+}
