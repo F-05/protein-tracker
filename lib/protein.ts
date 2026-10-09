@@ -59,3 +59,27 @@ export function proteinInPortion(grams: number, proteinPer100g: number): number 
 
     return Math.round(proteinGrams * 10) / 10;
 }
+
+export function totalProtein(amounts: number[]): number {
+    let totalProtein = 0;
+
+    for (const amount of amounts) {
+        totalProtein += amount;
+    }
+
+    return Math.round(totalProtein * 10) / 10;
+}
+
+export function progressPercent(eaten: number, target: number): number {
+    if (target <= 0) {
+        throw new Error("Target cannot be zero or less");
+    }
+
+    if (eaten < 0) {
+        throw new Error("Eaten cannot be negative");
+    }
+
+    const percentage = (eaten / target) * 100;
+
+    return Math.min(100, Math.round(percentage));
+}

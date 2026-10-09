@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { calculateDailyProtein, calculateProteinPerMeal, proteinInPortion, type Goal } from "@/lib/protein";
+import { calculateDailyProtein, calculateProteinPerMeal, proteinInPortion, totalProtein, type Goal } from "@/lib/protein";
 import PortionList from "@/components/PortionList";
 import { ensureSession } from "@/lib/auth";
 import { loadProfile, saveProfile } from "@/lib/profile";
-import { logMeal } from "@/lib/mealLogs";
+import { deleteMeal, loadTodaysMeals, logMeal, type MealLog } from "@/lib/mealLogs";
 import { type Food } from "@/lib/foods";
+import DailyProgress from "@/components/DailyProgress";
 
 
 const GOALS: { value: Goal; label: string }[] = [
@@ -35,6 +36,9 @@ export default function Home() {
     { type: "success" | "error"; text: string} | null
   >(null);
 
+  const [todaysMeals, setTodaysMeals] = useState<MealLog[]>([]);
+
+
   useEffect(() => {
     async function init() {
       await ensureSession();
@@ -45,6 +49,7 @@ export default function Home() {
         setWeight(String(profile.weightKg));
         setGoal(profile.goal);
         setMealsPerDay(String(profile.mealsPerDay));
+        setTodaysMeals(await loadTodaysMeals());
       }
     }
 
@@ -60,6 +65,7 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, [logMessage]);
 
+
   const dailyProtein = 
     weightKg > 0 ? calculateDailyProtein(weightKg, goal) : null;
 
@@ -68,7 +74,10 @@ export default function Home() {
       ? calculateProteinPerMeal(dailyProtein, meals)
       : null;
 
+  const eatenToday = totalProtein(todaysMeals.map((meal) => meal.proteinG));
+
   const canSave = weightKg > 0 && Number.isInteger(meals) && meals >= 1 && meals <= 10;
+
 
   async function handleSave() {
     if (!canSave) return;
@@ -84,11 +93,14 @@ export default function Home() {
     }
   }
 
+
   async function handleLog(food: Food, grams: number) {
     const proteinAmount = proteinInPortion(grams, food.proteinPer100g);
 
     try {
-      await logMeal({ foodId: food.id, grams, proteinG: proteinAmount });
+      const saved = await logMeal({ foodId: food.id, grams, proteinG: proteinAmount });
+      setTodaysMeals((current) => [saved, ...current]);
+      
       setLogMessage({
         type: "success",
         text: `Added ${grams} g of ${food.name} to your meal log.`,
@@ -101,6 +113,20 @@ export default function Home() {
       });
     }
   }
+
+  async function handleDelete(id: string) {
+    try{
+      await deleteMeal(id);
+      setTodaysMeals((current) => current.filter((meal) => meal.id !== id));
+    } catch (error) {
+      console.error("Failed to delete meal:", error);
+      setLogMessage({
+        type: "error",
+        text: `Could not remove that entry. Please try again.`,
+      });
+    }
+  }
+
 
   return (
     <div className="min-h-screen bg-sand-50 p-6">
@@ -199,21 +225,35 @@ export default function Home() {
           )}
         </div>
 
-        {proteinPerMeal !== null && (
-          <div className="w-full rounded-2xl bg-white p-6 shadow-sm md:flex-1">
-            {logMessage && (
-              <p
-                role="status"
-                className={`mb-3 rounded-lg px-3 py-2 text-sm ${
-                  logMessage.type === "success"
-                  ? "bg-brand-50 text-brand-700"
-                  : "bg-red-50 text-red-700"
-                }`}
-              >
-                {logMessage.text}
-              </p>
-            )}
-            <PortionList proteinPerMeal={proteinPerMeal} onLog={handleLog} />
+        {dailyProtein !== null && proteinPerMeal !== null && (
+          <div className="flex w-full flex-col gap-4 md:flex-1">
+
+            <div className="rounded-2xl bg-white p-6 shadow-sm">
+              <DailyProgress
+                target={dailyProtein}
+                eaten={eatenToday}
+                meals={todaysMeals}
+                onDelete={handleDelete}
+              />
+            </div>
+
+            <div className="rounded-2xl bg-white p-6 shadow-sm">
+              {logMessage && (
+                <p
+                  role="status"
+                  className={`mb-3 rounded-lg px-3 py-2 text-sm ${
+                    logMessage.type === "success"
+                    ? "bg-brand-50 text-brand-700"
+                    : "bg-red-50 text-red-700"
+                  }`}
+                >
+                  {logMessage.text}
+                </p>
+              )}
+
+              <PortionList proteinPerMeal={proteinPerMeal} onLog={handleLog} />
+            </div>
+  
           </div>
         )}
       </main>
